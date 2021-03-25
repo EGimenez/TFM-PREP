@@ -371,6 +371,114 @@ def test3():
     print(LA.norm(eps_eg))
 
 
+def test_drop_components():
+    from PIL import Image
+    from numpy import linalg as LA
+
+    img_eg = Image.open('test/032080.jpg')
+
+    old_size = img_eg.size
+    new_size = (256, 256)
+
+    new_img_eg = Image.new("RGB", new_size)
+
+    new_img_eg = img_eg.resize(new_size)
+
+    img_eg = np.reshape(np.array(new_img_eg), [1, 256, 256, 3])
+
+    eps_eg = encode(img_eg)
+
+    eps_eg_0 = eps_eg.copy()
+    eps_eg_100 = eps_eg.copy()
+
+
+    for t in range(0, 100):
+        print(t)
+        # Knokeamos 10 componentes
+        for c in range(10):
+            i = np.random.randint(eps_eg.shape[1])
+            eps_eg_0[0, i] = 0
+            eps_eg_100[0, i] = 100
+        dec = decode(eps_eg_0)
+        img = Image.fromarray(dec[0])
+        img.save('test/drop_components_0_'+str(t)+'.png')
+        dec = decode(eps_eg_100)
+        img = Image.fromarray(dec[0])
+        img.save('test/drop_components_100_'+str(t)+'.png')
+
+    print('hola')
+
+def test_drop_components_1_1():
+    from PIL import Image
+    from numpy import linalg as LA
+
+    img_eg = Image.open('test/032080.jpg')
+
+    old_size = img_eg.size
+    new_size = (256, 256)
+
+    new_img_eg = Image.new("RGB", new_size)
+
+    new_img_eg = img_eg.resize(new_size)
+
+    img_eg = np.reshape(np.array(new_img_eg), [1, 256, 256, 3])
+
+    eps_eg = encode(img_eg)
+
+
+    for t in range(0, 1000):
+        eps_eg_100 = eps_eg.copy()
+        print(t)
+        i = np.random.randint(eps_eg.shape[1])
+        eps_eg_100[0, i] = 100
+        dec = decode(eps_eg_100)
+        img = Image.fromarray(dec[0])
+        img.save('test/drop_components_100_1_1_i_100_'+str(i)+'.png')
+
+    print('hola')
+
+
+def test_drop_components_1_1_transition():
+    from PIL import Image
+    from numpy import linalg as LA
+
+    # Modifications
+    # 195309
+    # 194582
+    # 192426
+    # 120327
+
+    # People
+    # 082099
+    # 032080
+    # img
+
+    peoples = ['082099', '032080', 'img']
+    components = [195309, 194582, 192426, 120327]
+
+    for p in peoples:
+        print(p)
+        img_eg = Image.open('test/'+p+'.jpg')
+        new_size = (256, 256)
+        new_img_eg = img_eg.resize(new_size)
+        img_eg = np.reshape(np.array(new_img_eg), [1, 256, 256, 3])
+        eps_eg = encode(img_eg)
+
+        for c in components:
+            print(c)
+            eps_eg_100 = eps_eg.copy()
+
+            for t in np.arange(-100, 101, 2):
+                print(t)
+                eps_eg_100[0, c] = t
+                dec = decode(eps_eg_100)
+                img = Image.fromarray(dec[0])
+                img.save('test/transitions/components_p_'+str(p)+'_c_'+str(c)+'_t_'+str(t)+'.png')
+
+    print('hola')
+
+
+
 # warm start
 _img, _z = random(1)
 _z = encode(_img)
@@ -378,6 +486,7 @@ print("Warm started tf model")
 
 if __name__ == '__main__':
     print('test_2')
-    test2()
+    #test2()
+    test_drop_components_1_1_transition()
     print('done')
     #test3()
